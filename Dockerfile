@@ -82,16 +82,6 @@ RUN cd $(mktemp -d) && git clone https://git.kernel.org/pub/scm/devel/pahole/pah
     cd pahole && mkdir build && cd build && cmake -D__LIB=lib .. && make install
 
 RUN dpkg --add-architecture riscv64
-RUN apt-get install --yes --no-install-recommends debian-ports-archive-keyring
-RUN echo "arch: amd64" >> /etc/apt/sources.list.d/debian.sources
-RUN echo '\n\
-Types: deb\n\
-URIs: http://deb.debian.org/debian-ports\n\
-Suites: sid\n\
-Components: main\n\
-Signed-By: /usr/share/keyrings/debian-ports-archive-keyring.gpg\n\
-arch: riscv64\n'\
-> /etc/apt/sources.list.d/rv64.sources
 
 RUN apt-get update
 
@@ -111,9 +101,7 @@ RUN apt-get install --yes --no-install-recommends \
 
 RUN mkdir /rootfs
 
-RUN mmdebstrap --architectures=riscv64 --include="debian-ports-archive-keyring" --include="liburing2,libasound2,net-tools,socat,ethtool,iputils-ping,uuid-runtime,rsync,python3,libnuma1,libmnl0,libfuse2,libcap2,libcap-ng0,libhugetlbfs0,libssl3,jq,iptables,nftables,netsniff-ng,tcpdump,traceroute,tshark,fuse3,netcat-openbsd" sid /rootfs/sid.tar \
-    "deb http://deb.debian.org/debian-ports/ sid main"  \
-    "deb http://deb.debian.org/debian-ports/ unreleased main" \
+RUN mmdebstrap --architectures=riscv64 --include="liburing2,libasound2,net-tools,socat,ethtool,iputils-ping,uuid-runtime,rsync,python3,libnuma1,libmnl0,libfuse2,libcap2,libcap-ng0,libhugetlbfs0,libssl3,jq,iptables,nftables,netsniff-ng,tcpdump,traceroute,tshark,fuse3,netcat-openbsd" sid /rootfs/sid.tar \
     --customize-hook='echo rv-selftester > "$1/etc/hostname"' \
     --customize-hook='echo 44f789c720e545ab8fb376b1526ba6ca > "$1/etc/machine-id"' \
     --customize-hook='mkdir -p "$1/etc/systemd/system/serial-getty@ttyS0.service.d"' \
