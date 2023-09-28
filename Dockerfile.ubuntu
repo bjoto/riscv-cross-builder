@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
     bison \
     bsdmainutils \
     build-essential \
+    ccache \
     cpio \
     curl \
     diffstat \

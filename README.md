@@ -24,7 +24,7 @@ You now have a container named "ubuntu-builder".
 Run the container, pointing to your Linux kernel source tree,
 e.g. `/src/linux`:
 ```
-docker run --tty --interactive --volume "/src/linux":/workspace ubuntu-builder:latest /bin/bash
+docker run --tty --interactive --volume "/src/linux":/workspace --volume "/path/to/ccache":/ccache ubuntu-builder:latest /bin/bash
 ```
 
 In the container, build the kernel, and the kselftest using:
