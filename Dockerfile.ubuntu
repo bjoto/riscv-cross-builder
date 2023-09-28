@@ -2,9 +2,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FROM ubuntu:lunar
+ARG flavor=mantic
+
+FROM ubuntu:${flavor}
 
 ARG DEBIAN_FRONTEND=noninteractive
+
 
 # Base packages to retrieve the other repositories/packages
 RUN apt-get update && apt-get install --yes --no-install-recommends \
@@ -70,7 +73,7 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
     python3-docutils \
     kmod
 
-RUN echo 'deb [arch=amd64] http://apt.llvm.org/lunar/ llvm-toolchain-lunar main' >> /etc/apt/sources.list.d/llvm.list
+RUN echo 'deb [arch=amd64] http://apt.llvm.org/mantic/ llvm-toolchain-mantic main' >> /etc/apt/sources.list.d/llvm.list
 
 RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
 
@@ -84,9 +87,9 @@ RUN cd $(mktemp -d) && git clone https://git.kernel.org/pub/scm/devel/pahole/pah
 RUN dpkg --add-architecture riscv64
 RUN sed -i 's/^deb/deb [arch=amd64]/' /etc/apt/sources.list
 RUN echo '\n\
-deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports lunar main restricted multiverse universe\n\
-deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports lunar-updates main\n\
-deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports lunar-security main\n'\
+deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports mantic main restricted multiverse universe\n\
+deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports mantic-updates main\n\
+deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports mantic-security main\n'\
 >> /etc/apt/sources.list
 
 RUN apt-get update
@@ -107,7 +110,7 @@ RUN apt-get install --yes --no-install-recommends \
 
 RUN mkdir /rootfs
 
-RUN mmdebstrap --architectures=riscv64 --include="liburing2,libasound2,net-tools,socat,ethtool,iputils-ping,uuid-runtime,rsync,python3,libnuma1,libmnl0,libfuse2,libcap2,libcap-ng0,libhugetlbfs0,libssl3,jq,iptables,nftables,netsniff-ng,netperf,tcpdump,traceroute,tshark,fuse3,netcat-openbsd" lunar /rootfs/lunar.tar http://ports.ubuntu.com \
+RUN mmdebstrap --architectures=riscv64 --include="liburing2,libasound2,net-tools,socat,ethtool,iputils-ping,uuid-runtime,rsync,python3,libnuma1,libmnl0,libfuse2,libcap2,libcap-ng0,libhugetlbfs0,libssl3,jq,iptables,nftables,netsniff-ng,netperf,tcpdump,traceroute,tshark,fuse3,netcat-openbsd gdb" mantic /rootfs/mantic.tar http://ports.ubuntu.com \
     --components="main restricted multiverse universe" \
     --customize-hook='echo rv-selftester > "$1/etc/hostname"' \
     --customize-hook='echo 44f789c720e545ab8fb376b1526ba6ca > "$1/etc/machine-id"' \
