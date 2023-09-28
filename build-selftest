@@ -56,6 +56,8 @@ make ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- O=/workspace/kbuild HOSTCC=gcc 
 
 if [[ -f /rootfs/lunar.tar ]]; then
     f=lunar.tar
+elif [[ -f /rootfs/mantic.tar ]]; then
+    f=mantic.tar
 else
     f=sid.tar
 fi
