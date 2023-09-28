@@ -41,7 +41,7 @@ if [[ -n $modpath ]]; then
     imsz=$(du -B 1G -s "$modpath" | awk '{print $1}')
 fi
 
-imsz=$(( ${imsz} + 2 ))
+imsz=$(( ${imsz} + 4 ))
 
 eval "$(guestfish --listen)"
 
