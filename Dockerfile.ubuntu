@@ -112,7 +112,7 @@ RUN apt-get install --yes --no-install-recommends \
 
 RUN mkdir /rootfs
 
-RUN mmdebstrap --architectures=riscv64 --include="liburing2,libasound2,net-tools,socat,ethtool,iputils-ping,uuid-runtime,rsync,python3,libnuma1,libmnl0,libfuse2,libcap2,libcap-ng0,libhugetlbfs0,libssl3,jq,iptables,nftables,netsniff-ng,netperf,tcpdump,traceroute,tshark,fuse3,netcat-openbsd gdb" mantic /rootfs/mantic.tar http://ports.ubuntu.com \
+RUN mmdebstrap --architectures=riscv64 --include="liburing2,libasound2,net-tools,socat,ethtool,iputils-ping,uuid-runtime,rsync,python3,libnuma1,libmnl0,libfuse2,libcap2,libcap-ng0,libhugetlbfs0,libssl3,jq,iptables,nftables,netsniff-ng,netperf,tcpdump,traceroute,tshark,fuse3,netcat-openbsd,gdb,keyutils" mantic /rootfs/mantic.tar http://ports.ubuntu.com \
     --components="main restricted multiverse universe" \
     --customize-hook='echo rv-selftester > "$1/etc/hostname"' \
     --customize-hook='echo 44f789c720e545ab8fb376b1526ba6ca > "$1/etc/machine-id"' \
