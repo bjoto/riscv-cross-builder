@@ -15,6 +15,12 @@ kernel_make () {
     make ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- 'CC=ccache riscv64-linux-gnu-gcc' 'HOSTCC=ccache gcc' O=/workspace/kbuild $@
 }
 
+user_make () {
+    make ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC=riscv64-linux-gnu-gcc HOSTCC=gcc O=/workspace/kbuild $@
+}
+
+ccache -z
+
 kernel_make defconfig
 kernel_make kselftest-merge
 
@@ -28,7 +34,7 @@ kernel_make INSTALL_MOD_STRIP=1 \
      INSTALL_MOD_PATH=/workspace/build modules_install || true
 
 kernel_make headers
-kernel_make FORMAT= \
+user_make FORMAT= \
   SKIP_TARGETS="arm64 ia64 powerpc sparc64 x86 sgx" -j $(($(nproc)-1)) -C tools/testing/selftests gen_tar
 
 if [[ -f /rootfs/lunar.tar ]]; then
@@ -42,6 +48,9 @@ fi
 cp /rootfs/$f /workspace || true
 cd /workspace/kbuild/kselftest/kselftest_install/kselftest-packages/
 tar --append -f /workspace/$f ./kselftest.tar
+
+ccache -s -vv
+
 
 echo "Kernel selftest successfully built!"
 
