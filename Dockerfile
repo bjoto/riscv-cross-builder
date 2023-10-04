@@ -76,7 +76,7 @@ RUN echo 'deb [arch=amd64] http://apt.llvm.org/unstable/ llvm-toolchain main' >>
 RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
 
 RUN apt update
-RUN apt-get install --yes clang llvm
+RUN apt-get install --yes clang llvm lld
 
 # Ick. BPF requires pahole "supernew" to work
 RUN cd $(mktemp -d) && git clone https://git.kernel.org/pub/scm/devel/pahole/pahole.git && \
