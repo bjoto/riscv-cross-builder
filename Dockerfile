@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
     git-lfs \
     gperf \
     groff \
-    keyutils\ 
+    keyutils \
     less \
     libelf-dev \
     liburing-dev \
