@@ -37,6 +37,9 @@ kernel_make headers
 user_make FORMAT= \
   SKIP_TARGETS="arm64 ia64 powerpc sparc64 x86 sgx" -j $(($(nproc)-1)) -C tools/testing/selftests gen_tar
 
+# build perf
+user_make -j $(($(nproc)-1)) -C tools/perf
+
 if [[ -f /rootfs/lunar.tar ]]; then
     f=lunar.tar
 elif [[ -f /rootfs/mantic.tar ]]; then

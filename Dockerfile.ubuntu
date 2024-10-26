@@ -55,6 +55,7 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
     psmisc \
     python-is-python3 \
     python3-venv \
+    python3-dev \
     qemu-user-static \
     rsync \
     ruby \
@@ -108,7 +109,9 @@ RUN apt-get install --yes --no-install-recommends \
     libnuma-dev:riscv64 \
     libpopt-dev:riscv64 \
     libssl-dev:riscv64 \
-    liburing-dev:riscv64
+    liburing-dev:riscv64 \
+    libtraceevent-dev:riscv64 \
+    pkg-config:riscv64
 
 RUN mkdir /rootfs
 
