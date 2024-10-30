@@ -2,8 +2,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FROM debian:sid
+# Note that only debian:unstable work for Debian.
+ARG distro=ubuntu
+ARG flavor=noble
 
+FROM ${distro}:${flavor}
+
+ARG distro
+ARG flavor
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Base packages to retrieve the other repositories/packages
@@ -25,11 +31,15 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
     bison \
     bsdmainutils \
     build-essential \
+    ccache \
     cpio \
     curl \
     diffstat \
     flex \
     g++-riscv64-linux-gnu \
+    guestfish \
+    libguestfs-tools \
+    linux-image-generic \
     gawk \
     gcc-riscv64-linux-gnu \
     gdb \
@@ -71,46 +81,66 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
     python3-docutils \
     kmod
 
-RUN echo 'deb [arch=amd64] http://apt.llvm.org/unstable/ llvm-toolchain main' >> /etc/apt/sources.list.d/llvm.list
+RUN if [ "$distro" = "ubuntu" ]; then \
+      echo "deb [arch=amd64] http://apt.llvm.org/${flavor}/ llvm-toolchain-${flavor} main" >> /etc/apt/sources.list.d/llvm.list; \
+    else \
+      echo "deb [arch=amd64] http://apt.llvm.org/${flavor}/ llvm-toolchain main" >> /etc/apt/sources.list.d/llvm.list; \
+    fi
 
+RUN cat /etc/apt/sources.list.d/llvm.list
 RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
 
 RUN apt update
 RUN apt-get install --yes clang llvm lld
 
-# Ick. BPF requires pahole "supernew" to work
 RUN cd $(mktemp -d) && git clone https://git.kernel.org/pub/scm/devel/pahole/pahole.git && \
     cd pahole && mkdir build && cd build && cmake -D__LIB=lib .. && make install
 
 RUN dpkg --add-architecture riscv64
+RUN if [ "$distro" = "ubuntu" ]; then sed -i 's/^deb/deb [arch=amd64]/' /etc/apt/sources.list; fi
+RUN if [ "$distro" = "ubuntu" ]; then \
+      echo "\n\
+deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports ${flavor} main restricted multiverse universe\n\
+deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports ${flavor}-updates main\n\
+deb [arch=riscv64] http://ports.ubuntu.com/ubuntu-ports ${flavor}-security main\n"\
+    >> /etc/apt/sources.list; \
+    fi
+
+RUN if [ "$distro" = "ubuntu" ]; then sed -i -E "s/(^URIs.*)/\1\nArchitectures: amd64/" /etc/apt/sources.list.d/ubuntu.sources; fi
+
+RUN cat /etc/apt/sources.list.d/${distro}.sources
+RUN if [ "$distro" = "ubuntu" ]; then cat /etc/apt/sources.list; fi
 
 RUN apt-get update
 
+# Cross-build deps
 RUN apt-get install --yes --no-install-recommends \
     libasound2-dev:riscv64 \
+    libaudit-dev:riscv64 \
+    libc6-dev-riscv64-cross \
     libc6-dev:riscv64 \
     libcap-dev:riscv64 \
     libcap-ng-dev:riscv64 \
+    libcrypt-dev:riscv64 \
+    libdw-dev:riscv64 \
     libelf-dev:riscv64 \
     libfuse-dev:riscv64 \
     libhugetlbfs-dev:riscv64 \
+    liblzma-dev:riscv64 \
     libmnl-dev:riscv64 \
     libnuma-dev:riscv64 \
+    libpcre2-dev:riscv64 \
+    libpng-dev:riscv64 \
     libpopt-dev:riscv64 \
+    libselinux1-dev:riscv64 \
+    libsepol-dev:riscv64 \
+    libslang2-dev:riscv64 \
     libssl-dev:riscv64 \
-    liburing-dev:riscv64
-
-RUN mkdir /rootfs
-
-RUN mmdebstrap --architectures=riscv64 --include="liburing2,libasound2,net-tools,socat,ethtool,iputils-ping,uuid-runtime,rsync,python3,libnuma1,libmnl0,libfuse2,libcap2,libcap-ng0,libhugetlbfs0,libssl3,jq,iptables,nftables,netsniff-ng,tcpdump,traceroute,tshark,fuse3,netcat-openbsd,keyutils" sid /rootfs/sid.tar \
-    --customize-hook='echo rv-selftester > "$1/etc/hostname"' \
-    --customize-hook='echo 44f789c720e545ab8fb376b1526ba6ca > "$1/etc/machine-id"' \
-    --customize-hook='mkdir -p "$1/etc/systemd/system/serial-getty@ttyS0.service.d"' \
-    --customize-hook='printf "[Service]\nExecStart=\nExecStart=-/sbin/agetty -o \"-p -f -- \\\\\\\\u\" --keep-baud --autologin root 115200,57600,38400,9600 - \$TERM\n" > "$1/etc/systemd/system/serial-getty@ttyS0.service.d/autologin.conf"'
-
-RUN apt-get clean && rm -rf /var/lib/apt/lists/
-
-COPY build-selftest /usr/local/bin
+    libtraceevent-dev:riscv64 \
+    liburing-dev:riscv64 \
+    libzstd-dev:riscv64 \
+    linux-libc-dev:riscv64 \
+    zlib1g-dev:riscv64
 
 # The workspace volume is for bind-mounted source trees.
 VOLUME /workspace
